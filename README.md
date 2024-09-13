@@ -1,13 +1,14 @@
 # stream-bot
 ## 使い方
-* どっかしらのサイトを参考にして、下記のものを入れる。
-    - discord.js (14.7.1)
-    - node.js (18.13.0)
-    - npm (8.19.3)
+* node.npmの導入
+https://nodejs.org/en/
+
+*discord.jsの導入
+　npm install discord.js
 
 * Botを２つ作成。
 
-* `config copy.json`の名前を`config.json`に変更して中身を自分の環境に合わせて編集する。
+* `config.json`に変更して中身を自分の環境に合わせて編集する。
 
 * `.zip`でダウンロード、展開。
 
@@ -17,15 +18,23 @@
 
 * `index.js`の階層でコマンドプロンプト等を開き、`node index.js`を実行。
 
-* BOTに`Pong!`と返信してほしい時
+* BOTの起動確認
     - `/ping`を実行。
 
-* VCによくわからん音を流したい時
-    - `/join`、`/play`を実行。
-
-* VCの音を録音したい時
-    - `index.js`の階層で`rec`というフォルダを作成。
-    - `/join`、`/record`を実行。
-
-* VCの音を別のVCに中継したい時
+* BOTをVCに合流
+    - `/join`を実行。
+      
+* VCの中継開始
+    - `/start`を実行。
+      
+* VCの中継終了
+    - `/end`を実行。
+      
+* BOTをVCに合流後VCの中継開始
     - `/stream`を実行。
+      
+* BOTをVCから退出
+    - `/bye`を実行。
+      
+* VCの中継音量設定
+    - `/volume`を実行。
