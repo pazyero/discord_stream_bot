@@ -1,9 +1,10 @@
 const { SlashCommandBuilder, ChannelType } = require('discord.js');
 const { joinVoiceChannel } = require('@discordjs/voice');
+const cmdName = 'join';
 module.exports = {
 	data: new SlashCommandBuilder()
         // コマンドの名前
-		.setName('join')
+		.setName(cmdName)
         // コマンドの説明文
 		.setDescription('VCに参加。')
 		// コマンドのオプションを追加
@@ -33,22 +34,29 @@ module.exports = {
 				unSelectedVoiceChannels.push(voiceChannel);
 			}
 		}
-		
 		const filtered = unSelectedVoiceChannels.filter(unSelectedVoiceChannel => unSelectedVoiceChannel[1].name.startsWith(focusedValue));
 
 		await interaction.respond(
-			
 			filtered.map(unSelectedVoiceChannel => ({ name: unSelectedVoiceChannel[1].name, value: unSelectedVoiceChannel[1].id })).slice(0, 25)
 		);
 	},
-	async execute(interaction, client1, client2) {
-		const voiceChannel1 = interaction.options.getChannel('channel1');
-		const voiceChannel2 = interaction.options.getString('channel2');
+	async execute(interaction, client1, client2, userVolumes, connections,message,userBans ,voice1  = null,voice2 = null ) {
+		const command = interaction.client.commands.get(cmdName);
+
+		let voiceChannel1 = voice1;
+		let voiceChannel2 = voice2;
+		if (voice1 == null) {
+			voiceChannel1 = interaction.options.getChannel('channel1');
+		}
+		if (voice2 == null) {
+			voiceChannel2 = interaction.options.getString('channel2');
+		}
 
 		if (voiceChannel1 && voiceChannel2) {
 			if (voiceChannel1 === voiceChannel2) {
-				await interaction.reply('同じVCには参加できません');
-				return;
+				message = '同じVCには参加できません'
+				command.reply(interaction, message);
+				return [null ,null,null] ;
 			}
 			// Listener-botがVCに参加する処理
 			const connection1 = joinVoiceChannel({
@@ -71,8 +79,14 @@ module.exports = {
 				selfMute: false,
 				selfDeaf: true,
 			});
-			await interaction.reply('VCに参加しました！');
+			message ='VCに参加しました！'
+			command.reply(interaction, message);
 			return [connection1, connection2 , null ];
+		}
+	},
+	async reply(interaction, messege ) {
+		if(interaction.commandName == cmdName){
+			await interaction.reply(messege);
 		}
 	},
 };

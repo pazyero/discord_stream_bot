@@ -7,8 +7,10 @@ const client1 = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBi
 const client2 = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
 
 
-let connections = [];
+let connections = [null,null,null];
 let userVolumes = {}; // ユーザーごとの音量を保存
+let userBans = []; // 音声通信をしないユーザー
+let message = ''; // メッセージ
 // 今回はListenner-botに対してのみコマンドを割り当ててみる。
 client1.commands = new Collection();
 
@@ -42,20 +44,14 @@ client1.on(Events.InteractionCreate, async interaction => {
 
 	try {
         // コマンドを実行
-		if ( interaction.commandName === 'stream' || interaction.commandName === 'start' ) {
-			connections = await command.execute(interaction, client1, client2, userVolumes);
+		if (interaction.commandName === 'volume') {
+			userVolumes = await command.execute(interaction, client1, client2, userVolumes, connections,message,userBans);
 		}
-		else if (interaction.commandName === 'join') {
-			connections = await command.execute(interaction, client1, client2);
-		}
-		else if (interaction.commandName === 'bye' || interaction.commandName === 'end') {
-			await command.execute(interaction, connections);
-		}
-		else if (interaction.commandName === 'volume') {
-			userVolumes = await command.execute(interaction, userVolumes);
+		else  if (interaction.commandName === 'ban') {
+			userBans = await command.execute(interaction, client1, client2, userVolumes, connections,message,userBans);
 		}
 		else {
-			await command.execute(interaction);
+			connections = await command.execute(interaction, client1, client2, userVolumes, connections,message,userBans);
 		}
 		if (interaction.isAutocomplete()) {
 			await command.autocomplete(interaction);

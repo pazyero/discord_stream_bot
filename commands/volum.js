@@ -1,11 +1,10 @@
 const { SlashCommandBuilder } = require('discord.js');
+const cmdName = 'volume';
 
-// 音量を保存するマップ
-const volumeMap = new Map();
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('volume')
+        .setName(cmdName)
         .setDescription('指定ユーザーの音量を設定')
         .addUserOption(option =>
             option.setName('user')
@@ -17,16 +16,21 @@ module.exports = {
                 .setRequired(true)
                 .setMinValue(0)
                 .setMaxValue(200)),
-    async execute(interaction, userVolumes = {}) {
+    async execute(interaction, client1, client2, userVolumes = {}, connections ,message ,userBans) {
+		const command = interaction.client.commands.get(cmdName);
         const user = interaction.options.getUser('user');
         const volume = interaction.options.getInteger('volume');
 
         // ユーザーの音量を保存または更新
         userVolumes[user.id.toString()] = volume;
 
-        console.log(user.id);
-
-        await interaction.reply(`${user.username} の音量を ${volume}% に設定しました。`);
+        message =  `${user.username} の音量を ${volume}% に設定しました。`
+		command.reply(interaction, message);
         return userVolumes;
     },
+	async reply(interaction, messege ) {
+		if(interaction.commandName == cmdName){
+			await interaction.reply(messege);
+		}
+	},
 };

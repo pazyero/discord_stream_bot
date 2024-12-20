@@ -1,13 +1,17 @@
 const { SlashCommandBuilder } = require('discord.js');
+const cmdName = 'bye';
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('bye')
+		.setName(cmdName)
 		.setDescription('VCから切断。'),
-	async execute(interaction, connections) {
+	async execute(interaction, client1, client2, userVolumes, connections ,message,userBans) {
+
+		const command = interaction.client.commands.get(cmdName);
 		if (connections === undefined) {
-			await interaction.reply('VCに接続していません。');
-			return;
+			message = 'VCに接続していません。'
+			command.reply(interaction, message);
+			return [null ,null,null] ;
 		}
 		else {
 			for (const connection of connections) {
@@ -15,8 +19,14 @@ module.exports = {
 					connection.destroy();
 				}
 			}
-			await interaction.reply('Bye VC!');
-			return;
+			message = 'Bye VC!'
+			command.reply(interaction, message);
+			return [null ,null,null] ;
+		}
+	},
+	async reply(interaction, messege ) {
+		if(interaction.commandName == cmdName){
+			await interaction.reply(messege);
 		}
 	},
 };
