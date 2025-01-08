@@ -29,10 +29,11 @@ module.exports = {
 
 			mixer.setMaxListeners(setMaxListeners);
 
-			const handleUserSpeakingStart = (userId) => {
+			const handleUserSpeakingStart = async (userId) => {
 
 				if(!userBans.includes(userId)){
-					console.log(userId);
+					const user = await interaction.client.users.fetch(userId);
+					console.log( `${user.username}  Start`);
 					nowTolkUser.push(userId)
 
 					const standaloneInput = new AudioMixer.Input({
@@ -122,8 +123,9 @@ module.exports = {
 				console.log(error);
 			};
 
-			const handleUserSpeakingEnd = (userId) => {
-				console.log('handleUserSpeakingEnd');
+			const handleUserSpeakingEnd =async (userId) => {
+				const user = await interaction.client.users.fetch(userId);
+				console.log( `${user.username}  End`);
 			};
 
 			command.restart(connection1,handleUserSpeakingStart, handleReceiverError, handleUserSpeakingEnd);
