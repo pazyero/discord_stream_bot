@@ -139,9 +139,9 @@ module.exports = {
 		}
 
 	},
-	async reply(interaction, messege ) {
+	async reply(interaction, message ) {
 		if(interaction.commandName == cmdName){
-			await interaction.reply(messege);
+			await interaction.reply(message);
 		}
 	},
 	async returnObj(interaction,connection1, connection2, mixer,message) {

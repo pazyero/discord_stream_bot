@@ -58,9 +58,9 @@ module.exports = {
 			return [connections[0],connections[1],connections[2]];
 		}
 	},
-	async reply(interaction, messege ) {
+	async reply(interaction, message ) {
 		if(interaction.commandName == cmdName){
-			await interaction.reply(messege);
+			await interaction.reply(message);
 		}
 	},
 };

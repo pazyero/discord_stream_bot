@@ -24,9 +24,9 @@ module.exports = {
 			return [null ,null,null] ;
 		}
 	},
-	async reply(interaction, messege ) {
+	async reply(interaction, message ) {
 		if(interaction.commandName == cmdName){
-			await interaction.reply(messege);
+			await interaction.reply(message);
 		}
 	},
 };
