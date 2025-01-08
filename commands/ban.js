@@ -23,7 +23,7 @@ module.exports = {
     },
 	async reply(interaction, message ) {
 		if(interaction.commandName == cmdName){
-			await interaction.reply(message);
+			await interaction.reply({ content: message, ephemeral: true });
 		}
 	},
 };
