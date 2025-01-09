@@ -22,7 +22,7 @@ module.exports = {
 				.setAutocomplete(true)
 				.setRequired(true),
 		),
-		async autocomplete(interaction) {
+	async autocomplete(interaction) {
 		const focusedValue = interaction.options.getFocused();
 		const vc = interaction.options.get('channel1');
 		const chats = interaction.guild.channels.cache;
@@ -31,7 +31,11 @@ module.exports = {
 
 		for (const voiceChannel of voiceChannels) {
 			if (voiceChannel[0] !== vc.value) {
-				unSelectedVoiceChannels.push(voiceChannel);
+				// コマンド実行者がアクセスできるか確認
+				const permissions = voiceChannel[1].permissionsFor(interaction.user);
+				if (permissions && permissions.has('Connect')) { // 'Connect' は VCへの接続権限
+					unSelectedVoiceChannels.push(voiceChannel);
+				}
 			}
 		}
 		const filtered = unSelectedVoiceChannels.filter(unSelectedVoiceChannel => unSelectedVoiceChannel[1].name.startsWith(focusedValue));

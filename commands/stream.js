@@ -31,7 +31,11 @@ module.exports = {
 
 		for (const voiceChannel of voiceChannels) {
 			if (voiceChannel[0] !== vc.value) {
-				unSelectedVoiceChannels.push(voiceChannel);
+				// コマンド実行者がアクセスできるか確認
+				const permissions = voiceChannel[1].permissionsFor(interaction.user);
+				if (permissions && permissions.has('Connect')) { // 'Connect' は VCへの接続権限
+					unSelectedVoiceChannels.push(voiceChannel);
+				}
 			}
 		}
 
