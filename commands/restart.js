@@ -3,7 +3,7 @@ const { joinVoiceChannel, createAudioPlayer, NoSubscriberBehavior, EndBehaviorTy
 const AudioMixer = require('audio-mixer');
 const Prism = require('prism-media');
 const { PassThrough } = require('stream');
-const cmdName = 'resatar';
+const cmdName = 'restart';
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -18,7 +18,7 @@ module.exports = {
 		const voiceChannel2 = connections[1].joinConfig.channelId;
 
 		//endとstartを呼び出す
-		const endCommand = interaction.client.commands.get('bye');
+		const endCommand = interaction.client.commands.get('dc');
 		connections = await endCommand.execute(interaction, client1, client2, userVolumes, connections,message,userBans);
 
 		//endとstartを呼び出す

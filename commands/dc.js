@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const cmdName = 'bye';
+const cmdName = 'dc';
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -19,7 +19,7 @@ module.exports = {
 					connection.destroy();
 				}
 			}
-			message = 'Bye VC!'
+			message = 'disconnect VC!'
 			command.reply(interaction, message);
 			return [null ,null,null] ;
 		}

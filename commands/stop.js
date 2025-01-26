@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { getVoiceConnection } = require('@discordjs/voice');
-const cmdName = 'end';
+const cmdName = 'stop';
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -8,7 +8,6 @@ module.exports = {
 		.setDescription('VCの中継を終了'),
 	async execute(interaction, client1, client2, userVolumes, connections,message,userBans) {
 		const command = interaction.client.commands.get(cmdName);
-		console.log(connections[0])
 		const [connection1, connection2, mixer] = connections;
 
 		//登録しているイベントをすべて削除

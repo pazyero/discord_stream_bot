@@ -162,5 +162,12 @@ module.exports = {
 	},
 	async stop() {
 		stopFlg = true;
+
+		const player = createAudioPlayer({
+			behaviors: {
+				noSubscriber: NoSubscriberBehavior.play,
+			},
+		});
+		player.stop();
 	},
 };
