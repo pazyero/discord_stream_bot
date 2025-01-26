@@ -29,10 +29,10 @@
 * `/ban` `user`<br>
   指定したユーザーの音声を中継しないようにする
 
-* `/bye`<br>
+* `/dc`<br>
 VCからBOTを切断する
 
-* `/end`<br>
+* `/stop`<br>
 VCの中継を終了する
 
 * `/join` `channel1` `channel2`<br>
@@ -41,7 +41,7 @@ channel1にリスナーBOT・channel1にスピーカーBOTを参加させる
 * `/ping`<br>
 BOTの生存確認「Pong!」と返信してくれる
 
-* `/resatar`<br>
+* `/restart`<br>
 VC中継を一回終了し、再開させる。
 
 * `/start`<br>
