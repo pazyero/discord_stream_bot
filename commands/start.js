@@ -33,6 +33,7 @@ module.exports = {
 
 				if (!userBans.includes(userId)) {
 					console.log(`${userId} Start`);
+					nowTolkUser.push(userId)
 
 					const standaloneInput = new AudioMixer.Input({
 						channels: 1,
