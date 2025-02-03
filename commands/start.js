@@ -6,41 +6,39 @@ const { PassThrough } = require('stream');
 const cmdName = 'start';
 let stopFlg = true;
 let nowTolkUser = [];
-const setMaxListeners = 80
+const setMaxListeners = 80;
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName(cmdName)
 		.setDescription('VCを中継。'),
-	async execute(interaction, client1, client2, userVolumes, connections,message,userBans) {
+	async execute(interaction, client1, client2, userVolumes, connections, message, userBans) {
 		stopFlg = false;
 		const command = interaction.client.commands.get(cmdName);
 
-		const connection1 = getVoiceConnection(interaction.guildId, 'listener')
-		const connection2 = getVoiceConnection(interaction.guildId, 'speaker')
+		const connection1 = getVoiceConnection(interaction.guildId, 'listener');
+		const connection2 = getVoiceConnection(interaction.guildId, 'speaker');
 		if (connection1 && connection2) {
 
 			const mixer = new AudioMixer.Mixer({
-				channels: 2,
+				channels: 1,
 				bitDepth: 16,
-				sampleRate: 48000,
-				clearInterval: 250,
+				sampleRate: 44100,
+				clearInterval: 500,
 			});
 
 			mixer.setMaxListeners(setMaxListeners);
 
 			const handleUserSpeakingStart = async (userId) => {
 
-				if(!userBans.includes(userId)){
-					const user = await interaction.client.users.fetch(userId);
-					console.log( `${user.username}  Start`);
-					nowTolkUser.push(userId)
+				if (!userBans.includes(userId)) {
+					console.log(`${userId} Start`);
 
 					const standaloneInput = new AudioMixer.Input({
-						channels: 2,
+						channels: 1,
 						bitDepth: 16,
-						sampleRate: 48000,
-						volume: userVolumes[userId] || 100,  // ユーザーごとの音量を設定,
+						sampleRate: 44100,
+						volume: (userVolumes[userId] || 100) , // 音量を適正化
 					});
 					mixer.addInput(standaloneInput);
 
@@ -52,68 +50,26 @@ module.exports = {
 					});
 
 					const rawStream = new PassThrough();
-					audio
-						.pipe(new Prism.opus.Decoder({ rate: 48000, channels: 2, frameSize: 960 }))
-						.pipe(rawStream);
-
+					audio.pipe(new Prism.opus.Decoder({ rate: 48000, channels: 2, frameSize: 960 })).pipe(rawStream);
 					rawStream.pipe(standaloneInput);
 
 					const player = createAudioPlayer({
 						behaviors: {
-							noSubscriber: NoSubscriberBehavior.play,
+							noSubscriber: NoSubscriberBehavior.Play,
 						},
 					});
 
-					const resource = createAudioResource(mixer, {
-						inputType: StreamType.Raw,
-					});
-
+					const resource = createAudioResource(mixer, { inputType: StreamType.Raw });
 					player.play(resource);
 					connection2.subscribe(player);
 
 					rawStream.on('end', () => {
-						mixer.removeInput(standaloneInput);
-						standaloneInput.destroy();
-						rawStream.destroy();
-
-						var index = nowTolkUser.indexOf(userId);
-						nowTolkUser.splice(index, 1)
-
-						if (nowTolkUser.length == 0) {
-							//接続ユーザーがいない場合イベントをリセットする。
-							mixer.removeAllListeners();
-						}
-
-						//不要なイベントを削除する
-						mixer.removeAllListeners('close');
-						mixer.removeAllListeners('error');
-						mixer.removeAllListeners('end');
-						mixer.removeAllListeners('finish');
-						connection1.receiver.speaking.removeAllListeners();
-						command.restart(connection1,handleUserSpeakingStart, handleReceiverError, handleUserSpeakingEnd);
+						cleanupUser(userId, standaloneInput, rawStream, mixer, command, connection1, handleUserSpeakingStart, handleReceiverError, handleUserSpeakingEnd);
 					});
 
 					rawStream.on('error', (error) => {
 						console.error('Stream error:', error);
-						mixer.removeInput(standaloneInput);
-						standaloneInput.destroy();
-						rawStream.destroy();
-
-						var index = nowTolkUser.indexOf(userId);
-						nowTolkUser.splice(index, 1)
-
-						if (nowTolkUser.length == 0) {
-							//接続ユーザーがいない場合イベントをリセットする。
-							mixer.removeAllListeners();
-						}
-
-						//不要なイベントを削除する
-						mixer.removeAllListeners('close');
-						mixer.removeAllListeners('error');
-						mixer.removeAllListeners('end');
-						mixer.removeAllListeners('finish');
-						connection1.receiver.speaking.removeAllListeners();
-						command.restart(connection1,handleUserSpeakingStart, handleReceiverError, handleUserSpeakingEnd);
+						cleanupUser(userId, standaloneInput, rawStream, mixer, command, connection1, handleUserSpeakingStart, handleReceiverError, handleUserSpeakingEnd);
 					});
 				}
 			};
@@ -123,38 +79,35 @@ module.exports = {
 				console.log(error);
 			};
 
-			const handleUserSpeakingEnd =async (userId) => {
-				const user = await interaction.client.users.fetch(userId);
-				console.log( `${user.username}  End`);
+			const handleUserSpeakingEnd = async (userId) => {
+				console.log(`${userId} End`);
 			};
 
-			command.restart(connection1,handleUserSpeakingStart, handleReceiverError, handleUserSpeakingEnd);
+			command.restart(connection1, handleUserSpeakingStart, handleReceiverError, handleUserSpeakingEnd);
 
-
-			message = 'VCを中継します！'
+			message = 'VCを中継します！';
 			command.reply(interaction, message);
-			return command.returnObj(interaction, connection1, connection2, mixer ,message);
+			return command.returnObj(interaction, connection1, connection2, mixer, message);
 		} else {
-			message = 'VCに接続してください'
+			message = 'VCに接続してください';
 			command.reply(interaction, message);
-			return command.returnObj(interaction, null, null, null,message);
+			return command.returnObj(interaction, null, null, null, message);
 		}
-
 	},
-	async reply(interaction, message ) {
-		if(interaction.commandName == cmdName){
+	async reply(interaction, message) {
+		if (interaction.commandName === cmdName) {
 			await interaction.reply(message);
 		}
 	},
-	async returnObj(interaction,connection1, connection2, mixer,message) {
-		if(interaction.commandName == cmdName){
+	async returnObj(interaction, connection1, connection2, mixer, message) {
+		if (interaction.commandName === cmdName) {
 			return [connection1, connection2, mixer];
-		}else{
-			return [connection1, connection2, mixer , message];
+		} else {
+			return [connection1, connection2, mixer, message];
 		}
 	},
-	async restart(connection1,handleUserSpeakingStart, handleReceiverError, handleUserSpeakingEnd) {
-		if(!stopFlg){
+	async restart(connection1, handleUserSpeakingStart, handleReceiverError, handleUserSpeakingEnd) {
+		if (!stopFlg) {
 			connection1.receiver.speaking.on('start', handleUserSpeakingStart);
 			connection1.receiver.speaking.on('error', handleReceiverError);
 			connection1.receiver.speaking.on('end', handleUserSpeakingEnd);
@@ -162,12 +115,27 @@ module.exports = {
 	},
 	async stop() {
 		stopFlg = true;
-
-		const player = createAudioPlayer({
-			behaviors: {
-				noSubscriber: NoSubscriberBehavior.play,
-			},
-		});
+		const player = createAudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Play } });
 		player.stop();
 	},
 };
+
+function cleanupUser(userId, standaloneInput, rawStream, mixer, command, connection1, handleUserSpeakingStart, handleReceiverError, handleUserSpeakingEnd) {
+	mixer.removeInput(standaloneInput);
+	standaloneInput.destroy();
+	rawStream.destroy();
+
+	var index = nowTolkUser.indexOf(userId);
+	nowTolkUser.splice(index, 1);
+
+	if (nowTolkUser.length === 0) {
+		mixer.removeAllListeners();
+	}
+
+	mixer.removeAllListeners('close');
+	mixer.removeAllListeners('error');
+	mixer.removeAllListeners('end');
+	mixer.removeAllListeners('finish');
+	connection1.receiver.speaking.removeAllListeners();
+	command.restart(connection1, handleUserSpeakingStart, handleReceiverError, handleUserSpeakingEnd);
+}
