@@ -21,10 +21,10 @@ module.exports = {
 		if (connection1 && connection2) {
 
 			const mixer = new AudioMixer.Mixer({
-				channels: 1,
+				channels: 2,
 				bitDepth: 16,
 				sampleRate: 44100,
-				clearInterval: 500,
+				clearInterval: 250,
 			});
 
 			mixer.setMaxListeners(setMaxListeners);
@@ -36,7 +36,7 @@ module.exports = {
 					nowTolkUser.push(userId)
 
 					const standaloneInput = new AudioMixer.Input({
-						channels: 1,
+						channels: 2,
 						bitDepth: 16,
 						sampleRate: 44100,
 						volume: (userVolumes[userId] || 100) , // 音量を適正化
@@ -65,6 +65,7 @@ module.exports = {
 					connection2.subscribe(player);
 
 					rawStream.on('end', () => {
+						console.log(`${userId} End`);
 						cleanupUser(userId, standaloneInput, rawStream, mixer, command, connection1, handleUserSpeakingStart, handleReceiverError, handleUserSpeakingEnd);
 					});
 
@@ -76,12 +77,11 @@ module.exports = {
 			};
 
 			const handleReceiverError = (error) => {
-				console.log('handleReceiverError');
-				console.log(error);
+				console.log('handleReceiverError :',error);
 			};
 
 			const handleUserSpeakingEnd = async (userId) => {
-				console.log(`${userId} End`);
+				//console.log(`${userId} End`);
 			};
 
 			command.restart(connection1, handleUserSpeakingStart, handleReceiverError, handleUserSpeakingEnd);
